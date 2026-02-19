@@ -25,5 +25,13 @@ export default defineConfig({
         },
       }
     }
+  },
+  preview: {
+    host: true,
+    allowedHosts: [
+      'helpme5.onrender.com',
+      'helpme9.onrender.com',
+      '.onrender.com' // Allow all Render subdomains
+    ]
   }
 })
