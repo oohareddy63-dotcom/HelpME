@@ -68,11 +68,17 @@ const SignUp = ({ setIsAuthenticated, setUser }) => {
         setStep(2);
         if (response.data.otp) {
           setDevOtp(response.data.otp);
+          console.log('OTP received:', response.data.otp);
+        }
+        if (response.data.devMode) {
+          console.log('Running in dev mode - OTP will be shown in response');
         }
       }
     } catch (err) {
-      const msg = err.response?.data?.error || 
-        (err.code === 'ERR_NETWORK' ? 'Cannot reach server. Ensure the backend is running on port 5000.' : 'Failed to send OTP. Please try again.');
+      console.error('Send OTP error:', err);
+      console.error('Error response:', err.response?.data);
+      const msg = err.response?.data?.error || err.response?.data?.message ||
+        (err.code === 'ERR_NETWORK' ? 'Cannot reach server. Please check if backend is running.' : 'Failed to send OTP. Please try again.');
       setError(msg);
     } finally {
       setLoading(false);

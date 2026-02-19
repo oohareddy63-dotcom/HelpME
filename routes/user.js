@@ -39,32 +39,39 @@ router.post("/send-otp", [
   const { phone } = req.body;
   const phoneNum = typeof phone === "string" ? parseInt(phone, 10) : phone;
 
+  console.log(`[OTP Request] Phone: ${phoneNum}, Type: ${typeof phone}`);
+
   try {
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
     const otpExpiry = new Date(Date.now() + 10 * 60 * 1000);
 
+    console.log(`[OTP Generated] ${otp} for phone ${phoneNum}, expires at ${otpExpiry}`);
+
     const existingUser = await User.findOne({ phone: phoneNum });
     if (existingUser) {
       await User.updateOne({ phone: phoneNum }, { $set: { otp, otpExpiry } });
+      console.log(`[OTP] Updated existing user ${phoneNum}`);
     } else {
       await OtpCache.findOneAndUpdate(
         { phone: phoneNum },
         { $set: { otp, otpExpiry } },
         { upsert: true, new: true }
       );
+      console.log(`[OTP] Created OTP cache for new user ${phoneNum}`);
     }
 
     if (twilioClient && twilioPhoneNumber) {
       const toNumber = phone.toString().startsWith('+') ? phone : `+${twilioCountryCode.replace(/^\+/, '')}${phone}`;
+      console.log(`[SMS] Attempting to send to ${toNumber}`);
       try {
         await twilioClient.messages.create({
           body: `Your HelpMe verification code is: ${otp}. Valid for 10 minutes.`,
           from: twilioPhoneNumber,
           to: toNumber
         });
-        console.log(`OTP sent via SMS to ${toNumber}`);
+        console.log(`[SMS] OTP sent successfully to ${toNumber}`);
       } catch (twilioError) {
-        console.error('Twilio SMS error:', twilioError.message, twilioError.code);
+        console.error('[SMS Error]', twilioError.message, 'Code:', twilioError.code);
         
         // Handle various Twilio errors gracefully
         const isDailyLimitExceeded = twilioError.code === 63038;
@@ -72,29 +79,28 @@ router.post("/send-otp", [
         const isInvalidNumber = twilioError.code === 21614;
         
         if (isDailyLimitExceeded) {
-          console.log(`Daily SMS limit exceeded - Dev fallback - OTP for ${phone}: ${otp}`);
+          console.log(`[SMS] Daily limit exceeded - Dev fallback - OTP: ${otp}`);
         } else if (isTrialRestriction) {
-          console.log(`Trial account restriction - Dev fallback - OTP for ${phone}: ${otp}`);
+          console.log(`[SMS] Trial restriction - Dev fallback - OTP: ${otp}`);
         } else if (isInvalidNumber) {
-          console.log(`Invalid phone number - Dev fallback - OTP for ${phone}: ${otp}`);
+          console.log(`[SMS] Invalid number - Dev fallback - OTP: ${otp}`);
         } else {
-          console.log(`SMS error (${twilioError.code}) - Dev fallback - OTP for ${phone}: ${otp}`);
+          console.log(`[SMS] Error ${twilioError.code} - Dev fallback - OTP: ${otp}`);
         }
         
-        // In production, only throw error for critical issues, not limits
-        if (process.env.NODE_ENV === 'production' && !isDailyLimitExceeded && !isTrialRestriction) {
-          throw new Error(twilioError.message || 'SMS delivery failed. Please try again.');
-        }
+        // Don't throw error - allow OTP to be returned in response
       }
     } else {
-      console.log(`Dev mode - OTP for ${phone}: ${otp}`);
+      console.log(`[Dev Mode] Twilio not configured - OTP for ${phone}: ${otp}`);
     }
 
+    // Always return OTP in response for development/testing
+    // In production with working SMS, you can remove this
     res.status(200).json({
       success: true,
       message: "OTP sent successfully",
-      // In production, don't return the OTP
-      otp: process.env.NODE_ENV !== 'production' ? otp : undefined
+      otp: otp, // Return OTP for testing (remove in production with working SMS)
+      devMode: !twilioClient || !twilioPhoneNumber
     });
 
   } catch (err) {
@@ -124,6 +130,8 @@ router.post("/verify-otp", [
   const { phone, otp, name, address, location, fcmToken } = req.body;
   const phoneNum = typeof phone === "string" ? parseInt(phone, 10) : phone;
 
+  console.log(`[OTP Verify] Phone: ${phoneNum}, OTP: ${otp}`);
+
   try {
     // Find user with valid OTP (User model stores phone as number)
     let user = await User.findOne({ 
@@ -132,18 +140,27 @@ router.post("/verify-otp", [
       otpExpiry: { $gt: new Date() }
     });
 
+    console.log(`[OTP Verify] User found in User model: ${!!user}`);
+
     if (!user) {
       const otpEntry = await OtpCache.findOne({ phone: phoneNum, otp: String(otp), otpExpiry: { $gt: new Date() } });
+      console.log(`[OTP Verify] OTP found in cache: ${!!otpEntry}`);
+      
       if (!otpEntry) {
+        console.log(`[OTP Verify] Invalid or expired OTP for ${phoneNum}`);
         return res.status(400).json({ success: false, error: "Invalid or expired OTP" });
       }
+      
       if (!name || !String(name).trim() || !location?.coordinates?.length || !fcmToken) {
+        console.log(`[OTP Verify] Missing registration data - name: ${!!name}, location: ${!!location?.coordinates}, fcmToken: ${!!fcmToken}`);
         return res.status(400).json({ success: false, error: "Name, location and fcmToken are required for registration" });
       }
+      
       const coords = location.coordinates[0] !== 0 ? location.coordinates : [76.4180791, 29.8154373];
       user = new User({ phone: phoneNum, name: String(name).trim(), address: address || "", location: { type: "Point", coordinates: coords }, fcmToken });
       await user.save();
       await OtpCache.deleteOne({ phone: phoneNum });
+      console.log(`[OTP Verify] New user created: ${user._id}`);
     } else {
       await User.updateOne({ phone: phoneNum }, { $unset: { otp: 1, otpExpiry: 1 } });
       if (location?.coordinates?.length && fcmToken) {
@@ -152,6 +169,7 @@ router.post("/verify-otp", [
         if (fcmToken) update.fcmToken = fcmToken;
         if (Object.keys(update).length) await User.updateOne({ phone: phoneNum }, { $set: update });
       }
+      console.log(`[OTP Verify] Existing user logged in: ${user._id}`);
     }
 
     const userData = {

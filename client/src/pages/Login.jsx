@@ -86,16 +86,24 @@ const Login = ({ setIsAuthenticated, setUser }) => {
         setStep(2); // Move to OTP verification step
         if (response.data.otp) {
           setDevOtp(response.data.otp);
+          console.log('OTP received:', response.data.otp);
+        }
+        if (response.data.devMode) {
+          console.log('Running in dev mode - OTP will be shown in response');
         }
       } else {
         setError(response.data.error || 'Failed to send OTP');
       }
     } catch (err) {
       console.error('Send OTP error:', err);
+      console.error('Error response:', err.response?.data);
       if (err.response) {
-        setError(err.response.data.error || 'Failed to send OTP');
+        const errorMsg = err.response.data.error || err.response.data.message || 'Failed to send OTP';
+        setError(errorMsg);
+      } else if (err.code === 'ERR_NETWORK') {
+        setError('Cannot reach server. Please check if backend is running.');
       } else {
-        setError(err.code === 'ERR_NETWORK' ? 'Cannot reach server. Ensure the backend is running on port 5000.' : 'Network error. Please check your connection.');
+        setError('Network error. Please check your connection.');
       }
     } finally {
       setLoading(false);
