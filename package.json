@@ -1,0 +1,31 @@
+{
+  "name": "help-me",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "nodemon index.js",
+    "dev:all": "concurrently \"npm run dev\" \"npm run dev --prefix client\"",
+    "client": "npm run dev --prefix client"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "axios": "^1.13.5",
+    "body-parser": "^1.19.0",
+    "cors": "^2.8.6",
+    "dotenv": "^8.2.0",
+    "express": "^4.18.2",
+    "express-validator": "^6.14.3",
+    "firebase-admin": "^9.6.1",
+    "jsonwebtoken": "^8.5.1",
+    "mongoose": "^5.12.3",
+    "twilio": "^4.23.0"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2",
+    "nodemon": "^2.0.6"
+  }
+}

@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Login Test</title>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+</head>
+<body>
+    <h1>Login Test</h1>
+    <button onclick="testLogin()">Test Login</button>
+    <div id="result"></div>
+
+    <script>
+        // Configure axios
+        axios.defaults.baseURL = 'http://localhost:5000';
+
+        async function testLogin() {
+            const resultDiv = document.getElementById('result');
+            resultDiv.innerHTML = 'Testing login...';
+
+            try {
+                const response = await axios.post('/api/v1/users/login', {
+                    phone: 1234567890,
+                    location: { coordinates: [76.4180791, 29.8154373] },
+                    fcmToken: 'test-token'
+                });
+
+                console.log('Login successful:', response.data);
+                resultDiv.innerHTML = `<div style="color: green;">✅ Login successful! Token: ${response.data.token.substring(0, 20)}...</div>`;
+            } catch (error) {
+                console.error('Login error:', error);
+                resultDiv.innerHTML = `<div style="color: red;">❌ Login failed: ${error.message}</div>`;
+                
+                if (error.code === 'ERR_NETWORK') {
+                    resultDiv.innerHTML += '<br><div style="color: orange;">💡 This might be a CORS issue. Check backend CORS settings.</div>';
+                }
+            }
+        }
+    </script>
+</body>
+</html>

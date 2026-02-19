@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Frontend Test</title>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+</head>
+<body style="background: #1a1a1a; color: white; font-family: Arial; padding: 20px;">
+    <h1>🌐 Frontend Connection Test</h1>
+    <button onclick="testFrontend()">Test Frontend</button>
+    <div id="result"></div>
+
+    <script>
+        axios.defaults.baseURL = 'http://localhost:3002';
+        
+        async function testFrontend() {
+            const result = document.getElementById('result');
+            result.innerHTML = 'Testing...';
+            
+            try {
+                // Test proxy to backend
+                const response = await axios.post('/api/v1/users/login', {
+                    phone: 1234567890,
+                    location: { coordinates: [76.4180791, 29.8154373] },
+                    fcmToken: 'frontend-test'
+                });
+                
+                if (response.data.success) {
+                    result.innerHTML = `
+                        <div style="color: #4caf50;">
+                            ✅ Frontend-Backend Connection: WORKING<br>
+                            ✅ Proxy: WORKING<br>
+                            ✅ Login: SUCCESS<br>
+                            ✅ Token: ${response.data.token.substring(0, 20)}...
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                result.innerHTML = `
+                    <div style="color: #f44336;">
+                        ❌ Error: ${error.message}
+                    </div>
+                `;
+            }
+        }
+    </script>
+</body>
+</html>
