@@ -20,6 +20,7 @@ const allowedOrigins = [
   "http://127.0.0.1:3000",
   "http://127.0.0.1:3002",
   "http://127.0.0.1:3003",
+  "https://helpme5.onrender.com", // Deployed frontend
 ];
 if (process.env.WEB_CLIENT_URL && !allowedOrigins.includes(process.env.WEB_CLIENT_URL)) {
   allowedOrigins.push(process.env.WEB_CLIENT_URL);

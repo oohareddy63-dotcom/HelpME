@@ -1,12 +1,16 @@
 import axios from 'axios';
 
+// Get API URL from environment variable or use default
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+
 // Create an axios instance with base configuration
 const api = axios.create({
-  baseURL: '/', // Vite proxy handles /api routes to backend
-  timeout: 10000,
+  baseURL: API_URL,
+  timeout: 30000,
   headers: {
     'Content-Type': 'application/json',
-  }
+  },
+  withCredentials: false
 });
 
 // Request interceptor to add auth token
