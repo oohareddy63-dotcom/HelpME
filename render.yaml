@@ -1,0 +1,25 @@
+services:
+  - type: web
+    name: helpme-backend
+    env: node
+    repo: https://github.com/oohareddy63-dotcom/HelpME.git
+    rootDir: .
+    buildCommand: npm install
+    startCommand: npm start
+    envVars:
+      - key: MONGO_URI
+        value: mongodb+srv://oohareddy6362_db_user:pLFNKQKjfFzskHLs@helpme.fckmbe2.mongodb.net/helpme?appName=helpme
+      - key: JWT_SECRET
+        value: help-me-jwt-secret-key-2024
+      - key: TWILIO_ACCOUNT_SID
+        value: ACaa3f5c4d6e7b4c8f8a3b9c8d5e7f6a9b2c3d
+      - key: TWILIO_AUTH_TOKEN
+        value: your_actual_auth_token_here
+      - key: TWILIO_PHONE_NUMBER
+        value: +15017122761
+      - key: TWILIO_COUNTRY_CODE
+        value: 91
+      - key: WEB_CLIENT_URL
+        value: https://helpme9.onrender.com
+      - key: PORT
+        value: 5000
