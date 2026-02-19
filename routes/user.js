@@ -558,4 +558,77 @@ router.get("/:id", async (req, res) => {
   }
 });
 
+// @route       POST api/v1/users/direct-login
+// @desc         Direct login for default user (no OTP required)
+// @access      Public
+router.post("/direct-login", async (req, res) => {
+  const { username, password } = req.body;
+  
+  // Default credentials for testing
+  const DEFAULT_USERNAME = "admin";
+  const DEFAULT_PASSWORD = "admin123";
+  
+  if (username === DEFAULT_USERNAME && password === DEFAULT_PASSWORD) {
+    try {
+      // Find or create default user
+      let user = await User.findOne({ phone: 9999999999 });
+      
+      if (!user) {
+        user = new User({
+          phone: 9999999999,
+          name: 'Default Admin User',
+          location: {
+            type: 'Point',
+            coordinates: [76.4180791, 29.8154373]
+          },
+          fcmToken: 'default_fcm_token',
+          closeContacts: {
+            'Emergency1': '+919876543210',
+            'Emergency2': '+919876543211'
+          },
+          notifications: []
+        });
+        await user.save();
+      }
+      
+      // Generate JWT token
+      const payload = {
+        user: {
+          id: user._id,
+          phone: user.phone
+        }
+      };
+      
+      jwt.sign(
+        payload,
+        process.env.JWT_SECRET,
+        { expiresIn: "7d" },
+        (err, token) => {
+          if (err) throw err;
+          res.json({
+            success: true,
+            token,
+            user: {
+              id: user._id,
+              phone: user.phone,
+              name: user.name
+            }
+          });
+        }
+      );
+    } catch (err) {
+      console.error('Direct login error:', err.message);
+      res.status(500).json({
+        success: false,
+        error: "Internal Server Error"
+      });
+    }
+  } else {
+    res.status(401).json({
+      success: false,
+      error: "Invalid credentials"
+    });
+  }
+});
+
 module.exports = router;

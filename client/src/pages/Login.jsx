@@ -12,6 +12,9 @@ const Login = ({ setIsAuthenticated, setUser }) => {
   const [step, setStep] = useState(1); // 1: phone entry, 2: OTP verification
   const [otp, setOtp] = useState('');
   const [devOtp, setDevOtp] = useState('');
+  const [isDirectLogin, setIsDirectLogin] = useState(false); // New state for direct login
+  const [username, setUsername] = useState(''); // New state for direct login
+  const [password, setPassword] = useState(''); // New state for direct login
   const navigate = useNavigate();
 
   // Validate phone number
@@ -168,6 +171,47 @@ const Login = ({ setIsAuthenticated, setUser }) => {
     if (error) setError('');
   };
 
+  // Direct login function
+  const handleDirectLogin = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    setError('');
+
+    try {
+      const response = await api.post('/api/v1/users/direct-login', {
+        username,
+        password
+      });
+
+      if (response.data.success) {
+        const { token, user } = response.data;
+        
+        // Store authentication data
+        localStorage.setItem('token', token);
+        localStorage.setItem('userId', user.id);
+        localStorage.setItem('user', JSON.stringify(user));
+        
+        // Update app state
+        setIsAuthenticated(true);
+        setUser(user);
+        
+        // Navigate to dashboard
+        navigate('/dashboard');
+      } else {
+        setError(response.data.error || 'Login failed');
+      }
+    } catch (err) {
+      console.error('Direct login error:', err);
+      if (err.response) {
+        setError(err.response.data.error || 'Login failed');
+      } else {
+        setError('Network error. Please check your connection.');
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="auth-container">
       <div className="auth-card">
@@ -180,14 +224,79 @@ const Login = ({ setIsAuthenticated, setUser }) => {
         </div>
         
         <div className="auth-form-container">
-          <h2>{step === 1 ? 'Login' : 'Verify OTP'}</h2>
-          <p>{step === 1 ? 'Access your emergency assistance platform' : `Enter OTP sent to ${phone}`}</p>
+          <h2>{step === 1 ? (isDirectLogin ? 'Direct Login' : 'Login') : 'Verify OTP'}</h2>
+          <p>{step === 1 ? (isDirectLogin ? 'Login with default credentials' : 'Access your emergency assistance platform') : `Enter OTP sent to ${phone}`}</p>
           
           {error && <div className="error-message">{error}</div>}
           {locationError && <div className="warning-message">{locationError}</div>}
           
+          {step === 1 && !isDirectLogin && (
+            <div style={{ textAlign: 'center', marginBottom: '1rem' }}>
+              <button 
+                type="button" 
+                onClick={() => setIsDirectLogin(true)}
+                className="btn btn-link"
+                style={{ fontSize: '0.9rem' }}
+              >
+                Use Direct Login (No OTP Required)
+              </button>
+            </div>
+          )}
+          
+          {step === 1 && isDirectLogin && (
+            <div style={{ textAlign: 'center', marginBottom: '1rem' }}>
+              <button 
+                type="button" 
+                onClick={() => setIsDirectLogin(false)}
+                className="btn btn-link"
+                style={{ fontSize: '0.9rem' }}
+              >
+                ← Back to Phone Login
+              </button>
+            </div>
+          )}
+          
           {step === 1 ? (
-            <form onSubmit={handleSendOtp}>
+            isDirectLogin ? (
+              <form onSubmit={handleDirectLogin}>
+                <div className="form-group">
+                  <label htmlFor="username">Username:</label>
+                  <input
+                    type="text"
+                    id="username"
+                    value={username}
+                    onChange={(e) => setUsername(e.target.value)}
+                    placeholder="Enter username"
+                    className={error && !username ? 'error' : ''}
+                    disabled={loading}
+                  />
+                  <small>Default: admin</small>
+                </div>
+                
+                <div className="form-group">
+                  <label htmlFor="password">Password:</label>
+                  <input
+                    type="password"
+                    id="password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    placeholder="Enter password"
+                    className={error && !password ? 'error' : ''}
+                    disabled={loading}
+                  />
+                  <small>Default: admin123</small>
+                </div>
+                
+                <button 
+                  type="submit" 
+                  className="btn btn-primary btn-block"
+                  disabled={loading}
+                >
+                  {loading ? 'Logging in...' : 'Login Directly'}
+                </button>
+              </form>
+            ) : (
+              <form onSubmit={handleSendOtp}>
               <div className="form-group">
                 <label htmlFor="phone">Phone Number:</label>
                 <input
@@ -240,6 +349,7 @@ const Login = ({ setIsAuthenticated, setUser }) => {
                 {loading ? 'Sending OTP...' : 'Send OTP'}
               </button>
             </form>
+            )
           ) : (
             <form onSubmit={handleVerifyOtp}>
               <div className="form-group">
