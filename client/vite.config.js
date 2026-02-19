@@ -28,10 +28,13 @@ export default defineConfig({
   },
   preview: {
     host: true,
+    port: 3002,
     allowedHosts: [
-      'helpme5.onrender.com',
       'helpme9.onrender.com',
-      '.onrender.com' // Allow all Render subdomains
+      'helpme5.onrender.com',
+      '.onrender.com', // Allow all Render subdomains
+      'localhost', // Allow localhost
+      '127.0.0.1'   // Allow local IP
     ]
   }
 })
