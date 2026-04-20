@@ -6,6 +6,7 @@ const UserSchema = mongoose.Schema({
   },
   phone: {
     
+    
     type: Number,
     required: true,
   },
