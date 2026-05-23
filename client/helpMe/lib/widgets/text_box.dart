@@ -8,7 +8,6 @@ class TextBoxEmailPhone extends StatefulWidget {
   final Function onChanged;
   final bool obscureText;
   final bool enabled;
-
   const TextBoxEmailPhone(
       {Key key,
       this.hintText,
