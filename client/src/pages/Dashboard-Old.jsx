@@ -34,7 +34,6 @@ const Dashboard = ({ user, setUser, setIsAuthenticated }) => {
       );
     }
   };
-
   // Update location on backend
   const updateLocation = async (newLocation) => {
     try {
