@@ -27,6 +27,7 @@ const Dashboard = ({ user, setUser, setIsAuthenticated }) => {
           };
           setLocation(newLocation);
           updateLocation(newLocation);
+          
         },
         (error) => {
           console.error('Error getting location:', error);
