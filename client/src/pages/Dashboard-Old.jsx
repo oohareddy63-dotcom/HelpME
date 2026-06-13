@@ -17,7 +17,6 @@ const Dashboard = ({ user, setUser, setIsAuthenticated }) => {
   const [notifications, setNotifications] = useState([]);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
-
   // Get user location
   const getLocation = () => {
     if (navigator.geolocation) {
