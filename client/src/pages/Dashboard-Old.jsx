@@ -48,7 +48,6 @@ const Dashboard = ({ user, setUser, setIsAuthenticated }) => {
       console.error('Error updating location:', err);
     }
   };
-
   // Get nearby users
   const getNearbyUsers = async () => {
     if (location.coordinates[0] === 0) return;
@@ -70,7 +69,6 @@ const Dashboard = ({ user, setUser, setIsAuthenticated }) => {
       console.error('Error getting nearby users:', err);
     }
   };
-
   // Get user notifications
   const getUserNotifications = async () => {
     try {
