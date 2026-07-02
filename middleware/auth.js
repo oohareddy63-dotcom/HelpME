@@ -5,8 +5,7 @@ module.exports = function (req, res, next) {
   const token = authHeader && authHeader.startsWith("Bearer ") ? authHeader.substring(7) : null;
   // Check if not token
   if (!token) {
-    
-    return res.status(401).json({
+        return res.status(401).json({
       success: false,
       msg: "No token, authorization denied",
     });
