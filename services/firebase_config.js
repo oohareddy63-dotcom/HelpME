@@ -12,7 +12,6 @@ const admin = {
     console.log('Firebase Admin initialized (mock)');
   }
 };
-
 // Mock the service account requirement
 const serviceAccount = {
   // Mock service account data
