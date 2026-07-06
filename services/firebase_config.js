@@ -5,7 +5,6 @@ const admin = {
     sendToDevice: async (token, payload, options) => {
       console.log('Mock FCM notification sent:', { token, payload, options });
       // Simulate successful notification
-      
       return { success: true };
     }
   }),
