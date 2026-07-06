@@ -7,6 +7,7 @@ const admin = {
       // Simulate successful notification
       return { success: true };
     }
+    
   }),
   initializeApp: () => {
     console.log('Firebase Admin initialized (mock)');
