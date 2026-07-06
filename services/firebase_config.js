@@ -1,6 +1,5 @@
 // Mock Firebase Admin SDK for development
 // In production, replace with actual Firebase service account key
-
 const admin = {
   messaging: () => ({
     sendToDevice: async (token, payload, options) => {
