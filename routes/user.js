@@ -94,7 +94,6 @@ router.post("/send-otp", [
     } else {
       console.log(`[Dev Mode] Twilio not configured - OTP for ${phone}: ${otp}`);
     }
-
     // Always return OTP in response for development/testing
     // In production with working SMS, you can remove this
     res.status(200).json({
