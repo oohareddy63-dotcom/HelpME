@@ -5,7 +5,6 @@ const { check, validationResult } = require("express-validator");
 const auth = require("../middleware/auth");
 const User = require("../models/user");
 const OtpCache = require("../models/otpCache");
-
 // Twilio configuration - safely initialize only when credentials exist
 let twilioClient = null;
 const accountSid = process.env.TWILIO_ACCOUNT_SID;
