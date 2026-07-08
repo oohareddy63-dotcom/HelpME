@@ -24,6 +24,7 @@ if (accountSid && authToken) {
 // @route       POST api/v1/users/send-otp
 // @dsc         Send OTP to user's phone
 // @access      Public
+
 router.post("/send-otp", [
   check("phone", "Please include a valid 10-digit phone number").custom((val) => String(val).length === 10)
 ], async (req, res) => {
