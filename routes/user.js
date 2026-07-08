@@ -112,6 +112,7 @@ router.post("/send-otp", [
     });
   }
 });
+
 // @route       POST api/v1/users/verify-otp
 // @dsc         Verify OTP - for login (existing users) or registration (with name)
 // @access      Public
