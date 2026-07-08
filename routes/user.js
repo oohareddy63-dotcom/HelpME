@@ -19,7 +19,6 @@ if (accountSid && authToken) {
     console.warn('Twilio init failed - OTP will work in dev mode only:', err.message);
   }
 }
-
 // @route       POST api/v1/users/send-otp
 // @dsc         Send OTP to user's phone
 // @access      Public
