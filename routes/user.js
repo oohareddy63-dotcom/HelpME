@@ -73,7 +73,7 @@ router.post("/send-otp", [
         console.log(`[SMS] OTP sent successfully to ${toNumber}`);
       } catch (twilioError) {
         console.error('[SMS Error]', twilioError.message, 'Code:', twilioError.code);
-        
+
         // Handle various Twilio errors gracefully
         const isDailyLimitExceeded = twilioError.code === 63038;
         const isTrialRestriction = twilioError.code === 21608 || twilioError.code === 21211;
